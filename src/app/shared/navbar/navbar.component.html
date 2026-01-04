@@ -1,0 +1,114 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo -->
+    <a routerLink="/" class="navbar-logo">
+      <div class="logo-container">
+        <div class="logo-icon">🧁</div>
+        <div class="logo-glow"></div>
+      </div>
+      <div class="logo-text-wrapper">
+        <span class="logo-text">Cuisto</span>
+        <span class="logo-tagline">AI Chef</span>
+      </div>
+    </a>
+
+    <!-- Desktop Menu -->
+    <div class="navbar-menu">
+      <a routerLink="/recipes" routerLinkActive="active" class="nav-link">
+        <span class="nav-icon">🍽️</span>
+        <span>Recipes</span>
+      </a>
+
+      @if (authService.isAuthenticated()) {
+        <a routerLink="/create-recipe" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">✨</span>
+          <span>Create</span>
+        </a>
+
+        <a routerLink="/pantry" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">🥕</span>
+          <span>Pantry</span>
+        </a>
+      }
+    </div>
+
+    <!-- Right Side -->
+    <div class="navbar-actions">
+      @if (authService.isAuthenticated()) {
+        <!-- User Menu -->
+        <div class="user-menu">
+          <button class="user-button" (click)="toggleMenu()">
+            <div class="user-avatar">
+              {{ currentUser?.firstName?.charAt(0) || 'U' }}
+            </div>
+            <span class="user-name">{{ currentUser?.firstName }}</span>
+            <svg class="chevron" [class.rotate]="isMenuOpen" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          <!-- Dropdown -->
+          @if (isMenuOpen) {
+            <div class="dropdown-menu">
+              <a routerLink="/profile" class="dropdown-item" (click)="isMenuOpen = false">
+                <span>👤</span>
+                <span>Profile</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item" (click)="logout()">
+                <span>🚪</span>
+                <span>Logout</span>
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Auth Buttons -->
+        <a routerLink="/login" class="btn btn-ghost btn-sm">Login</a>
+        <a routerLink="/register" class="btn btn-primary btn-sm">Sign Up</a>
+      }
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" (click)="toggleMenu()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        @if (!isMenuOpen) {
+          <path d="M3 12h18M3 6h18M3 18h18"/>
+        } @else {
+          <path d="M18 6L6 18M6 6l12 12"/>
+        }
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  @if (isMenuOpen) {
+    <div class="mobile-menu">
+      <a routerLink="/recipes" routerLinkActive="active" class="mobile-link" (click)="toggleMenu()">
+        🍽️ Recipes
+      </a>
+
+      @if (authService.isAuthenticated()) {
+        <a routerLink="/create-recipe" routerLinkActive="active" class="mobile-link" (click)="toggleMenu()">
+          ✨ Create Recipe
+        </a>
+        <a routerLink="/pantry" routerLinkActive="active" class="mobile-link" (click)="toggleMenu()">
+          🥕 My Pantry
+        </a>
+        <a routerLink="/profile" routerLinkActive="active" class="mobile-link" (click)="toggleMenu()">
+          👤 Profile
+        </a>
+        <button class="mobile-link" (click)="logout()">
+          🚪 Logout
+        </button>
+      } @else {
+        <a routerLink="/login" class="mobile-link" (click)="toggleMenu()">
+          Login
+        </a>
+        <a routerLink="/register" class="mobile-link" (click)="toggleMenu()">
+          Sign Up
+        </a>
+      }
+    </div>
+  }
+</nav>

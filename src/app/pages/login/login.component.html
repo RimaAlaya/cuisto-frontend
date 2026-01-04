@@ -1,0 +1,127 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <!-- Left Side - Branding -->
+    <div class="auth-branding">
+      <div class="brand-content">
+        <div class="brand-icon">🧁</div>
+        <h1 class="brand-title">Welcome back to Cuisto!</h1>
+        <p class="brand-subtitle">Your personal AI cooking companion is waiting for you.</p>
+
+        <div class="features-list">
+          <div class="feature-item">
+            <span class="feature-icon">✨</span>
+            <span>Personalized recipe recommendations</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">📸</span>
+            <span>Smart ingredient scanning</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🎯</span>
+            <span>Track your cooking streaks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side - Form -->
+    <div class="auth-form-container">
+      <div class="form-wrapper">
+        <div class="form-header">
+          <h2>Sign In</h2>
+          <p>Continue your culinary journey</p>
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert alert-error">
+            <span>⚠️</span>
+            <span>{{ errorMessage }}</span>
+          </div>
+        }
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+          <!-- Email -->
+          <div class="input-group">
+            <label class="input-label" for="email">Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📧</span>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                class="input-field"
+                [class.input-error]="email?.invalid && email?.touched"
+                placeholder="you@example.com"
+                autocomplete="email"
+              />
+            </div>
+            @if (email?.invalid && email?.touched) {
+              <span class="error-message">
+                @if (email?.errors?.['required']) {
+                  Email is required
+                }
+                @if (email?.errors?.['email']) {
+                  Please enter a valid email
+                }
+              </span>
+            }
+          </div>
+
+          <!-- Password -->
+          <div class="input-group">
+            <label class="input-label" for="password">Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input
+                id="password"
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                class="input-field"
+                [class.input-error]="password?.invalid && password?.touched"
+                placeholder="••••••••"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="togglePassword()"
+              >
+                {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+              </button>
+            </div>
+            @if (password?.invalid && password?.touched) {
+              <span class="error-message">
+                @if (password?.errors?.['required']) {
+                  Password is required
+                }
+                @if (password?.errors?.['minlength']) {
+                  Password must be at least 6 characters
+                }
+              </span>
+            }
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg"
+            [disabled]="isLoading || loginForm.invalid"
+            style="width: 100%;"
+          >
+            @if (isLoading) {
+              <span class="spinner"></span>
+              <span>Signing in...</span>
+            } @else {
+              <span>Sign In</span>
+              <span>🚀</span>
+            }
+          </button>
+        </form>
+
+        <div class="form-footer">
+          <p>Don't have an account? <a routerLink="/register" class="link">Sign up</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,223 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <!-- Left Side - Branding -->
+    <div class="auth-branding">
+      <div class="brand-content">
+        <div class="brand-icon">🧁</div>
+        <h1 class="brand-title">Join Cuisto Today!</h1>
+        <p class="brand-subtitle">Start your personalized cooking journey with AI-powered recipes.</p>
+
+        <div class="progress-steps">
+          <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+            <div class="step-number">1</div>
+            <div class="step-label">Account</div>
+          </div>
+          <div class="step-line" [class.completed]="currentStep > 1"></div>
+          <div class="step" [class.active]="currentStep >= 2">
+            <div class="step-number">2</div>
+            <div class="step-label">Preferences</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side - Form -->
+    <div class="auth-form-container">
+      <div class="form-wrapper">
+        <div class="form-header">
+          <h2>Create Account</h2>
+          <p>{{ currentStep === 1 ? 'Tell us about yourself' : 'Personalize your experience' }}</p>
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert alert-error">
+            <span>⚠️</span>
+            <span>{{ errorMessage }}</span>
+          </div>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+
+          <!-- STEP 1: Account Info -->
+          @if (currentStep === 1) {
+            <div class="step-content">
+              <!-- First Name -->
+              <div class="input-group">
+                <label class="input-label" for="firstName">First Name</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">👤</span>
+                  <input
+                    id="firstName"
+                    type="text"
+                    formControlName="firstName"
+                    class="input-field"
+                    [class.input-error]="firstName?.invalid && firstName?.touched"
+                    placeholder="John"
+                  />
+                </div>
+                @if (firstName?.invalid && firstName?.touched) {
+                  <span class="error-message">First name is required</span>
+                }
+              </div>
+
+              <!-- Last Name -->
+              <div class="input-group">
+                <label class="input-label" for="lastName">Last Name</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">👤</span>
+                  <input
+                    id="lastName"
+                    type="text"
+                    formControlName="lastName"
+                    class="input-field"
+                    [class.input-error]="lastName?.invalid && lastName?.touched"
+                    placeholder="Doe"
+                  />
+                </div>
+                @if (lastName?.invalid && lastName?.touched) {
+                  <span class="error-message">Last name is required</span>
+                }
+              </div>
+
+              <!-- Email -->
+              <div class="input-group">
+                <label class="input-label" for="email">Email Address</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">📧</span>
+                  <input
+                    id="email"
+                    type="email"
+                    formControlName="email"
+                    class="input-field"
+                    [class.input-error]="email?.invalid && email?.touched"
+                    placeholder="you@example.com"
+                  />
+                </div>
+                @if (email?.invalid && email?.touched) {
+                  <span class="error-message">
+                    @if (email?.errors?.['required']) { Email is required }
+                    @if (email?.errors?.['email']) { Please enter a valid email }
+                  </span>
+                }
+              </div>
+
+              <!-- Password -->
+              <div class="input-group">
+                <label class="input-label" for="password">Password</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">🔒</span>
+                  <input
+                    id="password"
+                    [type]="showPassword ? 'text' : 'password'"
+                    formControlName="password"
+                    class="input-field"
+                    [class.input-error]="password?.invalid && password?.touched"
+                    placeholder="••••••••"
+                  />
+                  <button type="button" class="toggle-password" (click)="togglePassword()">
+                    {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+                  </button>
+                </div>
+                @if (password?.invalid && password?.touched) {
+                  <span class="error-message">
+                    @if (password?.errors?.['required']) { Password is required }
+                    @if (password?.errors?.['minlength']) { Password must be at least 6 characters }
+                  </span>
+                }
+              </div>
+
+              <button
+                type="button"
+                class="btn btn-primary btn-lg"
+                style="width: 100%;"
+                (click)="nextStep()"
+                [disabled]="registerForm.invalid"
+              >
+                <span>Continue</span>
+                <span>→</span>
+              </button>
+            </div>
+          }
+
+          <!-- STEP 2: Preferences -->
+          @if (currentStep === 2) {
+            <div class="step-content">
+              <!-- Favorite Cuisines -->
+              <div class="preference-group">
+                <label class="preference-label">
+                  <span class="label-icon">🍽️</span>
+                  <span>Favorite Cuisines</span>
+                  <span class="label-hint">(Optional)</span>
+                </label>
+                <div class="options-grid">
+                  @for (cuisine of cuisines; track cuisine.value) {
+                    <button
+                      type="button"
+                      class="option-chip"
+                      [class.selected]="selectedCuisines.has(cuisine.value)"
+                      (click)="toggleCuisine(cuisine.value)"
+                    >
+                      <span class="chip-emoji">{{ cuisine.emoji }}</span>
+                      <span>{{ cuisine.value }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Dietary Restrictions -->
+              <div class="preference-group">
+                <label class="preference-label">
+                  <span class="label-icon">🥗</span>
+                  <span>Dietary Preferences</span>
+                  <span class="label-hint">(Optional)</span>
+                </label>
+                <div class="options-grid">
+                  @for (option of dietaryOptions; track option.value) {
+                    <button
+                      type="button"
+                      class="option-chip"
+                      [class.selected]="selectedDietary.has(option.value)"
+                      (click)="toggleDietary(option.value)"
+                    >
+                      <span class="chip-emoji">{{ option.emoji }}</span>
+                      <span>{{ option.label }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button
+                  type="button"
+                  class="btn btn-ghost"
+                  (click)="previousStep()"
+                >
+                  <span>←</span>
+                  <span>Back</span>
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="isLoading"
+                  style="flex: 1;"
+                >
+                  @if (isLoading) {
+                    <span class="spinner"></span>
+                    <span>Creating account...</span>
+                  } @else {
+                    <span>Create Account</span>
+                    <span>🚀</span>
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        </form>
+
+        <div class="form-footer">
+          <p>Already have an account? <a routerLink="/login" class="link">Sign in</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
