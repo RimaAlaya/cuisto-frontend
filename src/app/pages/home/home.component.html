@@ -1,1 +1,137 @@
-<p>home works!</p>
+<div class="home-page">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-background">
+      <div class="gradient-orb orb-1"></div>
+      <div class="gradient-orb orb-2"></div>
+      <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <div class="container hero-content">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <span class="badge-icon">🚀</span>
+          <span>AI-Powered Cooking Companion</span>
+        </div>
+
+        <h1 class="hero-title">
+          Cook Smarter with
+          <span class="gradient-text">Cuisto</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          Your personal AI chef that turns ingredients into magic,
+          tracks your culinary journey, and makes cooking fun again.
+        </p>
+
+        <div class="hero-actions">
+          @if (!authService.isAuthenticated()) {
+            <button class="btn btn-primary btn-lg" (click)="navigateToRegister()">
+              <span>Get Started Free</span>
+              <span>→</span>
+            </button>
+            <button class="btn btn-outline btn-lg" (click)="navigateToRecipes()">
+              <span>Explore Recipes</span>
+            </button>
+          } @else {
+            <button class="btn btn-primary btn-lg" (click)="navigateToRecipes()">
+              <span>Browse Recipes</span>
+              <span>🍽️</span>
+            </button>
+          }
+        </div>
+
+        <div class="hero-stats">
+          @for (stat of stats; track stat.label) {
+            <div class="stat-item">
+              <div class="stat-value">{{ stat.value }}</div>
+              <div class="stat-label">{{ stat.label }}</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="mockup-container">
+          <div class="mockup-screen">
+            <div class="mockup-header">
+              <div class="mockup-dot"></div>
+              <div class="mockup-dot"></div>
+              <div class="mockup-dot"></div>
+            </div>
+            <div class="mockup-content">
+              <div class="recipe-preview">
+                <div class="recipe-image">🍝</div>
+                <div class="recipe-info">
+                  <h4>Tunisian Couscous</h4>
+                  <p>Ready in 45 min • 4 servings</p>
+                  <div class="recipe-tags">
+                    <span class="tag">Mediterranean</span>
+                    <span class="tag">Healthy</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="quick-stats">
+                <div class="stat-box">
+                  <span class="stat-emoji">⏱️</span>
+                  <span class="stat-text">45 min</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-emoji">🔥</span>
+                  <span class="stat-text">350 cal</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-emoji">⭐</span>
+                  <span class="stat-text">4.8/5</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>Everything You Need to Cook Better</h2>
+        <p>Powerful features that make cooking a delightful experience</p>
+      </div>
+
+      <div class="features-grid">
+        @for (feature of features; track feature.title) {
+          <div class="feature-card">
+            <div class="feature-icon">{{ feature.icon }}</div>
+            <h3 class="feature-title">{{ feature.title }}</h3>
+            <p class="feature-description">{{ feature.description }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="container">
+      <div class="cta-content">
+        <h2 class="cta-title">Ready to Transform Your Cooking?</h2>
+        <p class="cta-subtitle">Join thousands of home cooks already using Cuisto</p>
+
+        @if (!authService.isAuthenticated()) {
+          <button class="btn btn-primary btn-lg" (click)="navigateToRegister()">
+            <span>Start Cooking with AI</span>
+            <span>🚀</span>
+          </button>
+        } @else {
+          <button class="btn btn-primary btn-lg" (click)="navigateToRecipes()">
+            <span>Discover Recipes</span>
+            <span>🍽️</span>
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+</div>

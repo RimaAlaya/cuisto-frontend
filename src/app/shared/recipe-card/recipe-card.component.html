@@ -1,1 +1,65 @@
-<p>recipe-card works!</p>
+<div class="recipe-card" [routerLink]="['/recipes', recipe.id]">
+  <div class="recipe-image-container">
+    @if (recipe.imageUrl) {
+      <img [src]="recipe.imageUrl" [alt]="recipe.title" class="recipe-image" />
+    } @else {
+      <div class="recipe-image-placeholder">
+        <span class="placeholder-emoji">{{ defaultImage }}</span>
+      </div>
+    }
+
+    @if (recipe.difficulty) {
+      <div class="difficulty-badge" [attr.data-difficulty]="recipe.difficulty">
+        {{ recipe.difficulty }}
+      </div>
+    }
+  </div>
+
+  <div class="recipe-content">
+    <h3 class="recipe-title">{{ recipe.title }}</h3>
+
+    @if (recipe.description) {
+      <p class="recipe-description">{{ recipe.description }}</p>
+    }
+
+    <div class="recipe-meta">
+      <div class="meta-item">
+        <span class="meta-icon">⏱️</span>
+        <span>{{ totalTime }} min</span>
+      </div>
+
+      <div class="meta-item">
+        <span class="meta-icon">🍽️</span>
+        <span>{{ recipe.servings }} servings</span>
+      </div>
+
+      @if (recipe.nutrition?.calories) {
+        <div class="meta-item">
+          <span class="meta-icon">🔥</span>
+          <span>{{ recipe.nutrition.calories }} cal</span>
+        </div>
+      }
+    </div>
+
+    @if (recipe.dietaryTags && recipe.dietaryTags.length > 0) {
+      <div class="recipe-tags">
+        @for (tag of recipe.dietaryTags.slice(0, 3); track tag) {
+          <span class="tag">{{ tag }}</span>
+        }
+      </div>
+    }
+
+    <div class="recipe-footer">
+      <div class="cuisine-badge">
+        <span>{{ recipe.cuisine }}</span>
+      </div>
+
+      @if (recipe.averageRating && recipe.averageRating > 0) {
+        <div class="rating">
+          <span class="star">⭐</span>
+          <span>{{ recipe.averageRating.toFixed(1) }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>

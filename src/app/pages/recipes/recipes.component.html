@@ -1,1 +1,121 @@
-<p>recipes works!</p>
+<div class="recipes-page">
+  <div class="container">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Discover Recipes</h1>
+        <p>Explore thousands of delicious recipes from around the world</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search recipes..."
+          class="search-input"
+        />
+        @if (searchQuery) {
+          <button class="clear-search" (click)="searchQuery = ''; onSearchChange()">
+            ✕
+          </button>
+        }
+      </div>
+
+      <div class="filter-chips">
+        <!-- Cuisine Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Cuisine</label>
+          <select
+            [(ngModel)]="selectedCuisine"
+            (ngModelChange)="onCuisineChange()"
+            class="filter-select"
+          >
+            <option value="">All Cuisines</option>
+            @for (cuisine of cuisines; track cuisine) {
+              <option [value]="cuisine">{{ cuisine }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Meal Type Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Meal Type</label>
+          <select
+            [(ngModel)]="selectedMealType"
+            (ngModelChange)="onMealTypeChange()"
+            class="filter-select"
+          >
+            <option value="">All Types</option>
+            @for (type of mealTypes; track type) {
+              <option [value]="type">{{ type | titlecase }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Dietary Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Dietary</label>
+          <select
+            [(ngModel)]="selectedDietary"
+            (ngModelChange)="onDietaryChange()"
+            class="filter-select"
+          >
+            <option value="">All</option>
+            @for (tag of dietaryTags; track tag) {
+              <option [value]="tag">{{ tag | titlecase }}</option>
+            }
+          </select>
+        </div>
+
+        @if (hasActiveFilters) {
+          <button class="btn btn-ghost btn-sm" (click)="clearFilters()">
+            Clear Filters
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info">
+      <span class="results-count">
+        {{ filteredRecipes.length }} {{ filteredRecipes.length === 1 ? 'recipe' : 'recipes' }} found
+      </span>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-large"></div>
+        <p>Loading delicious recipes...</p>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && filteredRecipes.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>No recipes found</h3>
+        <p>Try adjusting your filters or search terms</p>
+        @if (hasActiveFilters) {
+          <button class="btn btn-primary" (click)="clearFilters()">
+            Clear All Filters
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Recipes Grid -->
+    @if (!isLoading && filteredRecipes.length > 0) {
+      <div class="recipes-grid">
+        @for (recipe of filteredRecipes; track recipe.id) {
+          <app-recipe-card [recipe]="recipe"></app-recipe-card>
+        }
+      </div>
+    }
+  </div>
+</div>
