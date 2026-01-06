@@ -3,8 +3,10 @@
     <!-- Header -->
     <div class="page-header">
       <div class="header-content">
-        <h1>🥕 My Pantry</h1>
-        <p>Manage your ingredients and discover recipes you can make right now</p>
+        <div class="header-text">
+          <h1>🥕 My Pantry</h1>
+          <p>Manage your ingredients and discover recipes you can make right now</p>
+        </div>
       </div>
 
       <div class="header-actions">
@@ -23,7 +25,7 @@
     <div class="pantry-stats">
       <div class="stat-card">
         <div class="stat-icon">📦</div>
-        <div class="stat-info">
+        <div class="stat-content">
           <div class="stat-value">{{ totalItems }}</div>
           <div class="stat-label">Ingredients</div>
         </div>
@@ -31,7 +33,7 @@
 
       <div class="stat-card">
         <div class="stat-icon">🏷️</div>
-        <div class="stat-info">
+        <div class="stat-content">
           <div class="stat-value">{{ categoriesWithItems.length }}</div>
           <div class="stat-label">Categories</div>
         </div>
@@ -39,150 +41,167 @@
 
       <div class="stat-card">
         <div class="stat-icon">🍽️</div>
-        <div class="stat-info">
+        <div class="stat-content">
           <div class="stat-value">{{ suggestedRecipes.length }}</div>
           <div class="stat-label">Possible Recipes</div>
         </div>
       </div>
     </div>
 
-    <!-- Add Item Form -->
+    <!-- Add Item Modal -->
     @if (showAddForm) {
-      <div class="add-form-container">
-        <form [formGroup]="addItemForm" (ngSubmit)="addItem()" class="add-form">
-          <div class="form-grid">
-            <div class="input-group">
-              <label class="input-label">Ingredient Name</label>
-              <input
-                type="text"
-                formControlName="ingredientName"
-                class="input-field"
-                placeholder="e.g., Tomatoes"
-              />
-            </div>
-
-            <div class="input-group">
-              <label class="input-label">Category</label>
-              <select formControlName="category" class="input-field">
-                <option value="">Select category</option>
-                @for (cat of categories; track cat.value) {
-                  <option [value]="cat.value">{{ cat.emoji }} {{ cat.label }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="input-group">
-              <label class="input-label">Amount</label>
-              <input
-                type="text"
-                formControlName="amount"
-                class="input-field"
-                placeholder="e.g., 5"
-              />
-            </div>
-
-            <div class="input-group">
-              <label class="input-label">Unit (Optional)</label>
-              <input
-                type="text"
-                formControlName="unit"
-                class="input-field"
-                placeholder="e.g., kg, pcs"
-              />
-            </div>
+      <div class="modal-overlay" (click)="toggleAddForm()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3 class="modal-title">Add New Ingredient</h3>
+            <button class="close-btn" (click)="toggleAddForm()">
+              ✕
+            </button>
           </div>
 
-          <button type="submit" class="btn btn-primary" [disabled]="addItemForm.invalid">
-            <span>Add to Pantry</span>
-          </button>
-        </form>
+          <div class="modal-body">
+            <form [formGroup]="addItemForm" (ngSubmit)="addItem()">
+              <div class="form-grid">
+                <div class="input-group full-width">
+                  <label class="input-label">Ingredient Name *</label>
+                  <input
+                    type="text"
+                    formControlName="ingredientName"
+                    class="input-field"
+                    placeholder="e.g., Tomatoes"
+                  />
+                </div>
+
+                <div class="input-group">
+                  <label class="input-label">Category *</label>
+                  <select formControlName="category" class="input-field">
+                    <option value="">Select category</option>
+                    @for (cat of categories; track cat.value) {
+                      <option [value]="cat.value">{{ cat.emoji }} {{ cat.label }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label class="input-label">Amount *</label>
+                  <input
+                    type="text"
+                    formControlName="amount"
+                    class="input-field"
+                    placeholder="e.g., 5"
+                  />
+                </div>
+
+                <div class="input-group">
+                  <label class="input-label">Unit</label>
+                  <input
+                    type="text"
+                    formControlName="unit"
+                    class="input-field"
+                    placeholder="e.g., kg, pcs"
+                  />
+                </div>
+
+                <div class="input-group">
+                  <label class="input-label">Expiration Date</label>
+                  <input
+                    type="date"
+                    formControlName="expirationDate"
+                    class="input-field"
+                  />
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" (click)="toggleAddForm()">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="addItemForm.invalid">
+                  <span>Add to Pantry</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     }
 
-    <!-- Pantry Items -->
-    <div class="pantry-content">
-      @if (isLoading) {
-        <div class="loading-state">
-          <div class="spinner-large"></div>
-          <p>Loading your pantry...</p>
-        </div>
-      } @else if (pantryItems.length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">🥕</div>
-          <h3>Your pantry is empty</h3>
-          <p>Start adding ingredients to discover amazing recipes!</p>
-          <button class="btn btn-primary" (click)="toggleAddForm()">
-            <span>Add Your First Ingredient</span>
-          </button>
-        </div>
-      } @else {
-        <!-- Group by category -->
-        @for (category of categoriesWithItems; track category) {
-          <div class="category-section">
-            <h3 class="category-title">
-              <span class="category-emoji">{{ getCategoryEmoji(category) }}</span>
-              <span>{{ category }}</span>
-              <span class="category-count">({{ getItemsByCategory(category).length }})</span>
-            </h3>
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-large"></div>
+        <p>Loading your pantry...</p>
+      </div>
+    }
 
-            <div class="items-grid">
-              @for (item of getItemsByCategory(category); track item.id) {
-                <div class="pantry-item-card">
-                  <div class="item-header">
-                    <div class="item-name">{{ item.ingredientName }}</div>
-                    <button class="delete-btn" (click)="deleteItem(item.id)">
-                      <span>🗑️</span>
-                    </button>
-                  </div>
+    <!-- Empty State -->
+    @if (!isLoading && pantryItems.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🥕</div>
+        <h3>Your pantry is empty</h3>
+        <p>Start adding ingredients to discover amazing recipes!</p>
+        <button class="btn btn-primary" (click)="toggleAddForm()">
+          <span>Add Your First Ingredient</span>
+        </button>
+      </div>
+    }
 
-                  <div class="item-details">
-                    <div class="item-amount">
-                      <span class="amount-value">{{ item.amount }}</span>
-                      @if (item.unit) {
-                        <span class="amount-unit">{{ item.unit }}</span>
-                      }
+    <!-- Pantry Items by Category -->
+    @if (!isLoading && pantryItems.length > 0) {
+      <div class="pantry-grid">
+        @for (item of pantryItems; track item.id) {
+          <div class="pantry-item">
+            <div class="item-header">
+              <div class="item-icon">{{ getCategoryEmoji(item.category) }}</div>
+              <div class="item-actions">
+                <button class="action-btn delete" (click)="deleteItem(item.id)">
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <div class="item-content">
+              <h4 class="item-name">{{ item.ingredientName }}</h4>
+              <span class="item-category">{{ item.category }}</span>
+              <div class="item-amount">
+                {{ item.amount }}
+                @if (item.unit) {
+                  <span>{{ item.unit }}</span>
+                }
+              </div>
+
+              @if (item.expirationDate || item.addedDate) {
+                <div class="item-meta">
+                  @if (item.addedDate) {
+                    <div class="meta-row">
+                      <span class="meta-label">Added:</span>
+                      <span class="meta-value">{{ item.addedDate | date:'shortDate' }}</span>
                     </div>
-
-                    @if (item.expirationDate) {
-                      <div class="item-expiry">
-                        <span>Expires: {{ item.expirationDate | date:'shortDate' }}</span>
-                      </div>
-                    }
-                  </div>
+                  }
+                  @if (item.expirationDate) {
+                    <div class="meta-row">
+                      <span class="meta-label">Expires:</span>
+                      <span class="meta-value">{{ item.expirationDate | date:'shortDate' }}</span>
+                    </div>
+                  }
                 </div>
               }
             </div>
           </div>
         }
-      }
-    </div>
+      </div>
+    }
 
     <!-- Suggested Recipes -->
     @if (suggestedRecipes.length > 0) {
-      <div class="suggested-recipes">
-        <h2 class="section-title">
+      <div class="suggested-recipes" style="margin-top: 3rem;">
+        <h2 class="section-title" style="font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem;">
           <span>✨ Recipes You Can Make</span>
         </h2>
 
-        <div class="recipes-grid">
+        <div class="recipes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
           @for (recipe of suggestedRecipes; track recipe.id) {
-            <a [routerLink]="['/recipes', recipe.id]" class="recipe-card">
-              <div class="recipe-image">
-                @if (recipe.imageUrl) {
-                  <img [src]="recipe.imageUrl" [alt]="recipe.title" />
-                } @else {
-                  <div class="recipe-placeholder">🍽️</div>
-                }
-              </div>
-
-              <div class="recipe-info">
-                <h4 class="recipe-title">{{ recipe.title }}</h4>
-                <div class="recipe-meta">
-                  <span>⏱️ {{ recipe.prepTimeMinutes + recipe.cookTimeMinutes }} min</span>
-                  <span>👥 {{ recipe.servings }} servings</span>
-                </div>
-              </div>
-            </a>
+            <app-recipe-card [recipe]="recipe"></app-recipe-card>
           }
         </div>
       </div>

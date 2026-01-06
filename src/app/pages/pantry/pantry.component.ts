@@ -5,12 +5,12 @@ import { PantryService } from '../../core/services/pantry.service';
 import { RecipeService } from '../../core/services/recipe.service';
 import { PantryItem } from '../../core/models/pantry-item';
 import { Recipe } from '../../core/models/recipe';
-import { RouterLink } from '@angular/router';
+import { RecipeCardComponent } from '../../shared/recipe-card/recipe-card.component';
 
 @Component({
   selector: 'app-pantry',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule,RecipeCardComponent],
   templateUrl: './pantry.component.html',
   styleUrl: './pantry.component.css'
 })

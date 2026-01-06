@@ -93,6 +93,56 @@
     </div>
   </section>
 
+  <!-- NEW: AI Recommendations Section (Only for authenticated users) -->
+  @if (authService.isAuthenticated()) {
+    <!-- Daily Challenge -->
+    @if (dailyChallenge) {
+      <section class="daily-challenge" style="padding: 4rem 0; background: var(--surface);">
+        <div class="container">
+          <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+              <span>🎯</span>
+              <span>Your Daily Challenge</span>
+            </h2>
+            <p style="color: var(--text-secondary);">Try something new today!</p>
+          </div>
+
+          <div style="max-width: 600px; margin: 0 auto;">
+            <app-recipe-card [recipe]="dailyChallenge"></app-recipe-card>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Personalized Recommendations -->
+    @if (personalizedRecipes.length > 0) {
+      <section class="recommendations" style="padding: 4rem 0;">
+        <div class="container">
+          <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+              <span>✨</span>
+              <span>Recipes Just For You</span>
+            </h2>
+            <p style="color: var(--text-secondary);">Based on your tastes and preferences</p>
+          </div>
+
+          @if (isLoadingRecommendations) {
+            <div style="text-align: center; padding: 3rem;">
+              <div class="spinner-large"></div>
+              <p style="color: var(--text-secondary); margin-top: 1rem;">Finding perfect recipes for you...</p>
+            </div>
+          } @else {
+            <div class="recipes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
+              @for (recipe of personalizedRecipes; track recipe.id) {
+                <app-recipe-card [recipe]="recipe"></app-recipe-card>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+
   <!-- Features Section -->
   <section class="features">
     <div class="container">
