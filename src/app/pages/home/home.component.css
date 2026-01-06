@@ -171,6 +171,9 @@
 .hero-visual {
   position: relative;
   height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   animation: fadeInRight 1s ease;
 }
 
@@ -185,65 +188,170 @@
   }
 }
 
-.visual-card {
-  position: absolute;
+.mockup-container {
+  width: 100%;
+  max-width: 400px;
+  perspective: 1000px;
+}
+
+.mockup-screen {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-xl);
-  backdrop-filter: blur(10px);
-  transition: transform 0.3s ease;
+  border: 8px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(16, 185, 129, 0.15), /* ADD THIS */
+    0 0 0 1px rgba(16, 185, 129, 0.1);
+  transform: rotateY(-5deg) rotateX(5deg);
+  transition: transform 0.5s ease;
+  animation: float 6s ease-in-out infinite; /* ADD THIS */
+
 }
 
-.visual-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.2);
-}
-
-.card-1 {
-  top: 10%;
-  left: 10%;
-  animation: cardFloat 4s ease-in-out infinite;
-}
-
-.card-2 {
-  top: 40%;
-  right: 5%;
-  animation: cardFloat 5s ease-in-out infinite;
-  animation-delay: 1s;
-}
-
-.card-3 {
-  bottom: 15%;
-  left: 20%;
-  animation: cardFloat 6s ease-in-out infinite;
-  animation-delay: 2s;
-}
-
-@keyframes cardFloat {
+/* ADD THIS ANIMATION */
+@keyframes float {
   0%, 100% {
-    transform: translateY(0);
+    transform: rotateY(-5deg) rotateX(5deg) translateY(0);
   }
   50% {
-    transform: translateY(-20px);
+    transform: rotateY(-5deg) rotateX(5deg) translateY(-10px);
   }
 }
 
-.card-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
+.mockup-screen:hover {
+  transform: rotateY(0deg) rotateX(0deg) scale(1.05);
+  animation: none; /* Pause float on hover */
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(16, 185, 129, 0.3), /* ADD THIS */
+    0 0 0 1px rgba(16, 185, 129, 0.2);
+
 }
 
-.card-title {
+.mockup-header {
+  background: rgba(16, 185, 129, 0.1);
+  padding: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.mockup-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  opacity: 0.3;
+}
+
+.mockup-content {
+  padding: 2rem;
+}
+
+.recipe-preview {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  animation: slideInUp 1s ease;
+  animation-delay: 0.3s;
+  animation-fill-mode: backwards;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.recipe-image {
+  font-size: 4rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.recipe-info h4 {
+  font-size: 1.25rem;
   font-weight: 700;
-  font-size: 1.125rem;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
-.card-subtitle {
+.recipe-info p {
   font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.recipe-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 0.375rem 0.75rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-box {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+  animation: pulse 3s ease-in-out infinite; /* ADD THIS */
+}
+
+.stat-box:nth-child(1) { animation-delay: 0s; }
+.stat-box:nth-child(2) { animation-delay: 0.3s; }
+.stat-box:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.stat-box:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px) scale(1.1) !important;
+  animation: none; /* Pause pulse on hover */
+}
+
+.stat-emoji {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-text {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 

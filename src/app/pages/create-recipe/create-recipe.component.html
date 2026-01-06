@@ -1,1 +1,364 @@
-<p>create-recipe works!</p>
+<div class="create-recipe-page">
+  <div class="container">
+    <div class="page-header">
+      <h1>Create New Recipe</h1>
+      <p>Share your culinary creation with the Cuisto community</p>
+    </div>
+
+    @if (successMessage) {
+      <div class="alert alert-success">
+        <span>✅</span>
+        <span>{{ successMessage }}</span>
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="alert alert-error">
+        <span>⚠️</span>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+
+    <form [formGroup]="recipeForm" (ngSubmit)="onSubmit()" class="recipe-form">
+
+      <!-- Basic Information -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2>📝 Basic Information</h2>
+        </div>
+
+        <div class="form-grid">
+          <!-- Title -->
+          <div class="input-group full-width">
+            <label class="input-label" for="title">Recipe Title *</label>
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              class="input-field"
+              placeholder="e.g., Tunisian Couscous with Vegetables"
+            />
+            @if (recipeForm.get('title')?.invalid && recipeForm.get('title')?.touched) {
+              <span class="error-message">Title is required (min 3 characters)</span>
+            }
+          </div>
+
+          <!-- Description -->
+          <div class="input-group full-width">
+            <label class="input-label" for="description">Description *</label>
+            <textarea
+              id="description"
+              formControlName="description"
+              class="input-field textarea"
+              rows="4"
+              placeholder="Describe your recipe, what makes it special..."
+            ></textarea>
+            @if (recipeForm.get('description')?.invalid && recipeForm.get('description')?.touched) {
+              <span class="error-message">Description is required (min 10 characters)</span>
+            }
+          </div>
+
+          <!-- Image URL -->
+          <div class="input-group full-width">
+            <label class="input-label" for="imageUrl">Image URL (Optional)</label>
+            <input
+              id="imageUrl"
+              type="url"
+              formControlName="imageUrl"
+              class="input-field"
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2>🏷️ Categories</h2>
+        </div>
+
+        <div class="form-grid">
+          <!-- Cuisine -->
+          <div class="input-group">
+            <label class="input-label" for="cuisine">Cuisine *</label>
+            <select id="cuisine" formControlName="cuisine" class="input-field">
+              <option value="">Select cuisine</option>
+              @for (cuisine of cuisines; track cuisine) {
+                <option [value]="cuisine">{{ cuisine }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Meal Type -->
+          <div class="input-group">
+            <label class="input-label" for="mealType">Meal Type *</label>
+            <select id="mealType" formControlName="mealType" class="input-field">
+              <option value="">Select meal type</option>
+              @for (type of mealTypes; track type) {
+                <option [value]="type">{{ type | titlecase }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Difficulty -->
+          <div class="input-group">
+            <label class="input-label" for="difficulty">Difficulty *</label>
+            <select id="difficulty" formControlName="difficulty" class="input-field">
+              @for (diff of difficulties; track diff) {
+                <option [value]="diff">{{ diff | titlecase }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Dietary Tags -->
+        <div class="input-group full-width">
+          <label class="input-label">Dietary Tags (Optional)</label>
+          <div class="tag-selector">
+            @for (tag of dietaryTags; track tag) {
+              <button
+                type="button"
+                class="tag-button"
+                [class.selected]="isDietaryTagSelected(tag)"
+                (click)="toggleDietaryTag(tag)"
+              >
+                {{ tag | titlecase }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Time & Servings -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2>⏱️ Time & Servings</h2>
+        </div>
+
+        <div class="form-grid">
+          <div class="input-group">
+            <label class="input-label" for="prepTime">Prep Time (minutes) *</label>
+            <input
+              id="prepTime"
+              type="number"
+              formControlName="prepTimeMinutes"
+              class="input-field"
+              min="1"
+              placeholder="15"
+            />
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="cookTime">Cook Time (minutes) *</label>
+            <input
+              id="cookTime"
+              type="number"
+              formControlName="cookTimeMinutes"
+              class="input-field"
+              min="1"
+              placeholder="30"
+            />
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="servings">Servings *</label>
+            <input
+              id="servings"
+              type="number"
+              formControlName="servings"
+              class="input-field"
+              min="1"
+              placeholder="4"
+            />
+          </div>
+
+          @if (totalTime > 0) {
+            <div class="info-box">
+              <span class="info-icon">⏱️</span>
+              <span>Total Time: {{ totalTime }} minutes</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Ingredients -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2>🥕 Ingredients</h2>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="addIngredient()">
+            <span>+</span>
+            <span>Add Ingredient</span>
+          </button>
+        </div>
+
+        <div formArrayName="ingredients" class="ingredients-list">
+          @for (ingredient of ingredients.controls; track $index) {
+            <div [formGroupName]="$index" class="ingredient-item">
+              <div class="ingredient-fields">
+                <input
+                  type="text"
+                  formControlName="name"
+                  class="input-field"
+                  placeholder="Ingredient name"
+                />
+                <input
+                  type="text"
+                  formControlName="amount"
+                  class="input-field"
+                  placeholder="Amount"
+                  style="max-width: 120px;"
+                />
+                <input
+                  type="text"
+                  formControlName="unit"
+                  class="input-field"
+                  placeholder="Unit"
+                  style="max-width: 100px;"
+                />
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="optional" />
+                  <span>Optional</span>
+                </label>
+              </div>
+              @if (ingredients.length > 1) {
+                <button
+                  type="button"
+                  class="btn-icon btn-danger"
+                  (click)="removeIngredient($index)"
+                  title="Remove ingredient"
+                >
+                  🗑️
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2>📖 Instructions</h2>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="addInstruction()">
+            <span>+</span>
+            <span>Add Step</span>
+          </button>
+        </div>
+
+        <div formArrayName="instructions" class="instructions-list">
+          @for (instruction of instructions.controls; track $index) {
+            <div [formGroupName]="$index" class="instruction-item">
+              <div class="step-number">Step {{ $index + 1 }}</div>
+              <textarea
+                formControlName="step"
+                class="input-field textarea"
+                rows="3"
+                placeholder="Describe this step in detail..."
+              ></textarea>
+              @if (instructions.length > 1) {
+                <button
+                  type="button"
+                  class="btn-icon btn-danger"
+                  (click)="removeInstruction($index)"
+                  title="Remove step"
+                >
+                  🗑️
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Nutrition (Optional) -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2>🥗 Nutrition Information (Optional)</h2>
+          <span class="section-hint">Per serving</span>
+        </div>
+
+        <div formGroupName="nutrition" class="form-grid">
+          <div class="input-group">
+            <label class="input-label" for="calories">Calories</label>
+            <input
+              id="calories"
+              type="number"
+              formControlName="calories"
+              class="input-field"
+              placeholder="350"
+            />
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="protein">Protein (g)</label>
+            <input
+              id="protein"
+              type="number"
+              formControlName="protein"
+              class="input-field"
+              placeholder="15"
+            />
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="carbs">Carbs (g)</label>
+            <input
+              id="carbs"
+              type="number"
+              formControlName="carbs"
+              class="input-field"
+              placeholder="45"
+            />
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="fat">Fat (g)</label>
+            <input
+              id="fat"
+              type="number"
+              formControlName="fat"
+              class="input-field"
+              placeholder="12"
+            />
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="fiber">Fiber (g)</label>
+            <input
+              id="fiber"
+              type="number"
+              formControlName="fiber"
+              class="input-field"
+              placeholder="8"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-ghost btn-lg"
+          routerLink="/recipes"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg"
+          [disabled]="isLoading"
+        >
+          @if (isLoading) {
+            <span class="spinner"></span>
+            <span>Creating...</span>
+          } @else {
+            <span>Create Recipe</span>
+            <span>✨</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

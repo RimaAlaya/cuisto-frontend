@@ -1,1 +1,240 @@
-<p>recipe-detail works!</p>
+<div class="recipe-detail-page">
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="loader"></div>
+      <p>Loading recipe...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !isLoading) {
+    <div class="error-container">
+      <div class="error-icon">😕</div>
+      <h2>Oops! Something went wrong</h2>
+      <p>{{ error }}</p>
+      <button class="btn btn-primary" (click)="goBack()">
+        <span>← Back to Recipes</span>
+      </button>
+    </div>
+  }
+
+  <!-- Recipe Content -->
+  @if (recipe && !isLoading) {
+    <div class="recipe-container">
+      <!-- Back Button -->
+      <button class="back-button" (click)="goBack()">
+        <span>←</span>
+        <span>Back to Recipes</span>
+      </button>
+
+      <!-- Hero Section -->
+      <div class="recipe-hero">
+        <div class="hero-image">
+          @if (recipe.imageUrl) {
+            <img [src]="recipe.imageUrl" [alt]="recipe.title" />
+          } @else {
+            <div class="image-placeholder">
+              <span class="placeholder-icon">🍽️</span>
+            </div>
+          }
+
+          <!-- Action Buttons -->
+          <div class="hero-actions">
+            <button
+              class="action-btn"
+              [class.active]="isLiked"
+              (click)="toggleLike()"
+              title="Like recipe"
+            >
+              <span>{{ isLiked ? '❤️' : '🤍' }}</span>
+            </button>
+            <button
+              class="action-btn"
+              [class.active]="isSaved"
+              (click)="toggleSave()"
+              title="Save recipe"
+            >
+              <span>{{ isSaved ? '🔖' : '📑' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-content">
+          <!-- Tags -->
+          <div class="recipe-tags">
+            <span class="badge badge-primary">{{ recipe.cuisine }}</span>
+            <span class="badge badge-secondary">{{ recipe.mealType }}</span>
+            @for (tag of recipe.dietaryTags; track tag) {
+              <span class="badge badge-accent">{{ tag }}</span>
+            }
+          </div>
+
+          <!-- Title -->
+          <h1 class="recipe-title">{{ recipe.title }}</h1>
+
+          <!-- Description -->
+          @if (recipe.description) {
+            <p class="recipe-description">{{ recipe.description }}</p>
+          }
+
+          <!-- Quick Stats -->
+          <div class="quick-stats">
+            <div class="stat-item">
+              <span class="stat-icon">⏱️</span>
+              <div class="stat-content">
+                <span class="stat-value">{{ getTotalTime() }} min</span>
+                <span class="stat-label">Total Time</span>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <span class="stat-icon">👥</span>
+              <div class="stat-content">
+                <span class="stat-value">{{ recipe.servings }}</span>
+                <span class="stat-label">Servings</span>
+              </div>
+            </div>
+
+            @if (recipe.difficulty) {
+              <div class="stat-item">
+                <span class="stat-icon">📊</span>
+                <div class="stat-content">
+                  <span
+                    class="stat-value"
+                    [style.color]="getDifficultyColor(recipe.difficulty)"
+                  >
+                    {{ recipe.difficulty }}
+                  </span>
+                  <span class="stat-label">Difficulty</span>
+                </div>
+              </div>
+            }
+
+            @if (recipe.nutrition?.calories) {
+              <div class="stat-item">
+                <span class="stat-icon">🔥</span>
+                <div class="stat-content">
+                  <span class="stat-value">{{ recipe.nutrition?.calories }}</span>
+                  <span class="stat-label">Calories</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Rating -->
+          @if (recipe.averageRating && recipe.totalRatings) {
+            <div class="recipe-rating">
+              <div class="stars">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <span [class.filled]="star <= (recipe.averageRating || 0)">⭐</span>
+                }
+              </div>
+              <span class="rating-text">
+                {{ recipe.averageRating?.toFixed(1) }}
+                ({{ recipe.totalRatings }} reviews)
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="recipe-main">
+        <!-- Ingredients Section -->
+        <div class="ingredients-section">
+          <div class="section-header">
+            <h2>
+              <span class="section-icon">🛒</span>
+              <span>Ingredients</span>
+            </h2>
+            <span class="ingredient-count">{{ recipe.ingredients.length }} items</span>
+          </div>
+
+          <div class="ingredients-list">
+            @for (ingredient of recipe.ingredients; track ingredient.name) {
+              <div class="ingredient-item">
+                <input type="checkbox" [id]="'ing-' + ingredient.name" />
+                <label [for]="'ing-' + ingredient.name">
+                  <span class="ingredient-amount">{{ ingredient.amount }}</span>
+                  <span class="ingredient-name">{{ ingredient.name }}</span>
+                  @if (ingredient.optional) {
+                    <span class="optional-badge">Optional</span>
+                  }
+                </label>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Instructions Section -->
+        <div class="instructions-section">
+          <div class="section-header">
+            <h2>
+              <span class="section-icon">📝</span>
+              <span>Instructions</span>
+            </h2>
+            <span class="step-count">{{ recipe.instructions.length }} steps</span>
+          </div>
+
+          <div class="instructions-list">
+            @for (instruction of recipe.instructions; track $index) {
+              <div class="instruction-step">
+                <div class="step-number">{{ $index + 1 }}</div>
+                <div class="step-content">
+                  <p>{{ instruction }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Nutrition Section -->
+      @if (recipe.nutrition) {
+        <div class="nutrition-section">
+          <div class="section-header">
+            <h2>
+              <span class="section-icon">📊</span>
+              <span>Nutrition Facts</span>
+            </h2>
+            <span class="serving-note">Per serving</span>
+          </div>
+
+          <div class="nutrition-grid">
+            @if (recipe.nutrition.calories) {
+              <div class="nutrition-item">
+                <span class="nutrition-label">Calories</span>
+                <span class="nutrition-value">{{ recipe.nutrition.calories }}</span>
+              </div>
+            }
+            @if (recipe.nutrition.protein) {
+              <div class="nutrition-item">
+                <span class="nutrition-label">Protein</span>
+                <span class="nutrition-value">{{ recipe.nutrition.protein }}g</span>
+              </div>
+            }
+            @if (recipe.nutrition.carbs) {
+              <div class="nutrition-item">
+                <span class="nutrition-label">Carbs</span>
+                <span class="nutrition-value">{{ recipe.nutrition.carbs }}g</span>
+              </div>
+            }
+            @if (recipe.nutrition.fat) {
+              <div class="nutrition-item">
+                <span class="nutrition-label">Fat</span>
+                <span class="nutrition-value">{{ recipe.nutrition.fat }}g</span>
+              </div>
+            }
+            @if (recipe.nutrition.fiber) {
+              <div class="nutrition-item">
+                <span class="nutrition-label">Fiber</span>
+                <span class="nutrition-value">{{ recipe.nutrition.fiber }}g</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
