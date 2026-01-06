@@ -1,1 +1,369 @@
-<p>profile works!</p>
+<div class="profile-page">
+  <div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>My Profile</h1>
+        <p>Manage your account and cooking preferences</p>
+      </div>
+      <button
+        class="btn btn-primary btn-lg"
+        (click)="toggleEditMode()"
+      >
+        @if (isEditMode) {
+          <span>Cancel</span>
+          <span>✕</span>
+        } @else {
+          <span>Edit Profile</span>
+          <span>✏️</span>
+        }
+      </button>
+    </div>
+
+    <div class="profile-container">
+      <!-- Sidebar -->
+      <aside class="profile-sidebar">
+        <!-- Avatar Card -->
+        <div class="avatar-card">
+          <div class="avatar-wrapper">
+            <div class="avatar-large">
+              @if (user?.avatarUrl) {
+                <img [src]="user?.avatarUrl" [alt]="user?.firstName" />
+              } @else {
+                <div class="avatar-gradient">
+                  {{ user?.firstName?.charAt(0) }}{{ user?.lastName?.charAt(0) }}
+                </div>
+              }
+            </div>
+            <button class="avatar-edit-btn" (click)="changeAvatar()">
+              📷
+            </button>
+          </div>
+
+          <div class="user-info">
+            <h2 class="user-name">{{ user?.firstName }} {{ user?.lastName }}</h2>
+            <p class="user-email">{{ user?.email }}</p>
+          </div>
+
+          @if (user?.bio) {
+            <p class="user-bio">{{ user?.bio }}</p>
+          }
+        </div>
+
+        <!-- Stats Card -->
+        <div class="stats-card">
+          <h3 class="card-title">
+            <span class="title-icon">📊</span>
+            <span>Cooking Stats</span>
+          </h3>
+
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-icon">🔥</div>
+              <div class="stat-info">
+                <div class="stat-value">{{ user?.cookingStreak || 0 }}</div>
+                <div class="stat-label">Day Streak</div>
+              </div>
+            </div>
+
+            <div class="stat-box">
+              <div class="stat-icon">🍳</div>
+              <div class="stat-info">
+                <div class="stat-value">{{ user?.totalRecipesCooked || 0 }}</div>
+                <div class="stat-label">Recipes Made</div>
+              </div>
+            </div>
+
+            <div class="stat-box">
+              <div class="stat-icon">⭐</div>
+              <div class="stat-info">
+                <div class="stat-value">{{ user?.points || 0 }}</div>
+                <div class="stat-label">Total Points</div>
+              </div>
+            </div>
+
+            <div class="stat-box">
+              <div class="stat-icon">🏆</div>
+              <div class="stat-info">
+                <div class="stat-value">{{ user?.badgesEarned?.length || 0 }}</div>
+                <div class="stat-label">Badges</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Level Progress -->
+        <div class="level-card">
+          <div class="level-header">
+            <span class="level-badge">Level {{ currentLevel }}</span>
+            <span class="level-points">{{ user?.points || 0 }} / {{ nextLevelPoints }} XP</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width]="levelProgress + '%'"></div>
+          </div>
+          <p class="progress-text">{{ pointsToNextLevel }} XP to Level {{ currentLevel + 1 }}</p>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="profile-main">
+        @if (!isEditMode) {
+          <!-- VIEW MODE -->
+
+            <!-- Preferences Section -->
+          <section class="content-section">
+            <div class="section-header">
+              <h2>
+                <span class="section-icon">🍽️</span>
+                <span>Favorite Cuisines</span>
+              </h2>
+            </div>
+
+            @if ((user?.favoriteCuisines?.length || 0) > 0) {
+              <div class="cuisine-grid">
+                @for (cuisine of user?.favoriteCuisines; track cuisine) {
+                  <div class="cuisine-chip">
+                    <span class="chip-emoji">{{ getCuisineEmoji(cuisine) }}</span>
+                    <span>{{ cuisine }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-state-small">
+                <span class="empty-icon">🍽️</span>
+                <p>No favorite cuisines selected</p>
+              </div>
+            }
+          </section>
+
+          <!-- Dietary Preferences -->
+          <section class="content-section">
+            <div class="section-header">
+              <h2>
+                <span class="section-icon">🥗</span>
+                <span>Dietary Preferences</span>
+              </h2>
+            </div>
+
+            @if ((user?.dietaryRestrictions?.length || 0) > 0) {
+              <div class="dietary-grid">
+                @for (dietary of user?.dietaryRestrictions; track dietary) {
+                  <div class="dietary-chip">
+                    <span class="chip-emoji">{{ getDietaryEmoji(dietary) }}</span>
+                    <span>{{ dietary | titlecase }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-state-small">
+                <span class="empty-icon">🥗</span>
+                <p>No dietary preferences set</p>
+              </div>
+            }
+          </section>
+
+          <!-- Badges Section -->
+          <section class="content-section">
+            <div class="section-header">
+              <h2>
+                <span class="section-icon">🏆</span>
+                <span>Achievements</span>
+              </h2>
+              <span class="badge-count">{{ earnedBadges.length }} / {{ allBadges.length }}</span>
+            </div>
+
+            <div class="badges-grid">
+              @for (badge of allBadges; track badge.id) {
+                <div
+                  class="badge-card"
+                  [class.locked]="!isBadgeEarned(badge.id)"
+                  [class.earned]="isBadgeEarned(badge.id)"
+                >
+                  <div class="badge-icon-wrapper">
+                    @if (isBadgeEarned(badge.id)) {
+                      <span class="badge-icon earned">{{ badge.icon }}</span>
+                      <div class="badge-glow"></div>
+                    } @else {
+                      <span class="badge-icon locked">🔒</span>
+                    }
+                  </div>
+                  <div class="badge-info">
+                    <h4 class="badge-name">{{ badge.name }}</h4>
+                    <p class="badge-description">{{ badge.description }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Recent Activity -->
+          <section class="content-section">
+            <div class="section-header">
+              <h2>
+                <span class="section-icon">📝</span>
+                <span>Recent Activity</span>
+              </h2>
+            </div>
+
+            @if (recentActivities.length > 0) {
+              <div class="activity-feed">
+                @for (activity of recentActivities; track activity.id) {
+                  <div class="activity-item">
+                    <div class="activity-icon">{{ activity.icon }}</div>
+                    <div class="activity-content">
+                      <p class="activity-text">{{ activity.text }}</p>
+                      <span class="activity-time">{{ activity.time }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-state-small">
+                <span class="empty-icon">📝</span>
+                <p>No recent activity</p>
+              </div>
+            }
+          </section>
+
+        } @else {
+          <!-- EDIT MODE -->
+          <form class="edit-form">
+
+            <!-- Personal Info -->
+            <section class="content-section">
+              <div class="section-header">
+                <h2>
+                  <span class="section-icon">👤</span>
+                  <span>Personal Information</span>
+                </h2>
+              </div>
+
+              <div class="form-grid">
+                <div class="input-group">
+                  <label class="input-label" for="firstName">First Name</label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    [(ngModel)]="editedUser.firstName"
+                    name="firstName"
+                    class="input-field"
+                    placeholder="John"
+                  />
+                </div>
+
+                <div class="input-group">
+                  <label class="input-label" for="lastName">Last Name</label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    [(ngModel)]="editedUser.lastName"
+                    name="lastName"
+                    class="input-field"
+                    placeholder="Doe"
+                  />
+                </div>
+
+                <div class="input-group full-width">
+                  <label class="input-label" for="email">Email</label>
+                  <input
+                    id="email"
+                    type="email"
+                    [(ngModel)]="editedUser.email"
+                    name="email"
+                    class="input-field"
+                    placeholder="john@example.com"
+                  />
+                </div>
+
+                <div class="input-group full-width">
+                  <label class="input-label" for="bio">Bio (Optional)</label>
+                  <textarea
+                    id="bio"
+                    [(ngModel)]="editedUser.bio"
+                    name="bio"
+                    class="input-field textarea"
+                    rows="4"
+                    placeholder="Tell us about yourself..."
+                  ></textarea>
+                </div>
+              </div>
+            </section>
+
+            <!-- Favorite Cuisines -->
+            <section class="content-section">
+              <div class="section-header">
+                <h2>
+                  <span class="section-icon">🍽️</span>
+                  <span>Favorite Cuisines</span>
+                </h2>
+              </div>
+
+              <div class="options-grid">
+                @for (cuisine of cuisineOptions; track cuisine.value) {
+                  <button
+                    type="button"
+                    class="option-chip"
+                    [class.selected]="isCuisineSelected(cuisine.value)"
+                    (click)="toggleCuisine(cuisine.value)"
+                  >
+                    <span class="chip-emoji">{{ cuisine.emoji }}</span>
+                    <span>{{ cuisine.value }}</span>
+                  </button>
+                }
+              </div>
+            </section>
+
+            <!-- Dietary Preferences -->
+            <section class="content-section">
+              <div class="section-header">
+                <h2>
+                  <span class="section-icon">🥗</span>
+                  <span>Dietary Preferences</span>
+                </h2>
+              </div>
+
+              <div class="options-grid">
+                @for (option of dietaryOptions; track option.value) {
+                  <button
+                    type="button"
+                    class="option-chip"
+                    [class.selected]="isDietarySelected(option.value)"
+                    (click)="toggleDietary(option.value)"
+                  >
+                    <span class="chip-emoji">{{ option.emoji }}</span>
+                    <span>{{ option.label }}</span>
+                  </button>
+                }
+              </div>
+            </section>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-ghost btn-lg"
+                (click)="cancelEdit()"
+              >
+                <span>Cancel</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary btn-lg"
+                (click)="saveChanges()"
+                [disabled]="isSaving"
+              >
+                @if (isSaving) {
+                  <span class="spinner"></span>
+                  <span>Saving...</span>
+                } @else {
+                  <span>Save Changes</span>
+                  <span>✓</span>
+                }
+              </button>
+            </div>
+          </form>
+        }
+      </main>
+    </div>
+  </div>
+</div>

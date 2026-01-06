@@ -1,1 +1,191 @@
-<p>pantry works!</p>
+<div class="pantry-page">
+  <div class="container">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>🥕 My Pantry</h1>
+        <p>Manage your ingredients and discover recipes you can make right now</p>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-secondary" (click)="searchRecipes()" [disabled]="totalItems === 0">
+          <span>🔍</span>
+          <span>Find Recipes</span>
+        </button>
+        <button class="btn btn-primary" (click)="toggleAddForm()">
+          <span>{{ showAddForm ? '✕' : '+' }}</span>
+          <span>{{ showAddForm ? 'Cancel' : 'Add Ingredient' }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="pantry-stats">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalItems }}</div>
+          <div class="stat-label">Ingredients</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🏷️</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ categoriesWithItems.length }}</div>
+          <div class="stat-label">Categories</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🍽️</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ suggestedRecipes.length }}</div>
+          <div class="stat-label">Possible Recipes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Item Form -->
+    @if (showAddForm) {
+      <div class="add-form-container">
+        <form [formGroup]="addItemForm" (ngSubmit)="addItem()" class="add-form">
+          <div class="form-grid">
+            <div class="input-group">
+              <label class="input-label">Ingredient Name</label>
+              <input
+                type="text"
+                formControlName="ingredientName"
+                class="input-field"
+                placeholder="e.g., Tomatoes"
+              />
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Category</label>
+              <select formControlName="category" class="input-field">
+                <option value="">Select category</option>
+                @for (cat of categories; track cat.value) {
+                  <option [value]="cat.value">{{ cat.emoji }} {{ cat.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Amount</label>
+              <input
+                type="text"
+                formControlName="amount"
+                class="input-field"
+                placeholder="e.g., 5"
+              />
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Unit (Optional)</label>
+              <input
+                type="text"
+                formControlName="unit"
+                class="input-field"
+                placeholder="e.g., kg, pcs"
+              />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" [disabled]="addItemForm.invalid">
+            <span>Add to Pantry</span>
+          </button>
+        </form>
+      </div>
+    }
+
+    <!-- Pantry Items -->
+    <div class="pantry-content">
+      @if (isLoading) {
+        <div class="loading-state">
+          <div class="spinner-large"></div>
+          <p>Loading your pantry...</p>
+        </div>
+      } @else if (pantryItems.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🥕</div>
+          <h3>Your pantry is empty</h3>
+          <p>Start adding ingredients to discover amazing recipes!</p>
+          <button class="btn btn-primary" (click)="toggleAddForm()">
+            <span>Add Your First Ingredient</span>
+          </button>
+        </div>
+      } @else {
+        <!-- Group by category -->
+        @for (category of categoriesWithItems; track category) {
+          <div class="category-section">
+            <h3 class="category-title">
+              <span class="category-emoji">{{ getCategoryEmoji(category) }}</span>
+              <span>{{ category }}</span>
+              <span class="category-count">({{ getItemsByCategory(category).length }})</span>
+            </h3>
+
+            <div class="items-grid">
+              @for (item of getItemsByCategory(category); track item.id) {
+                <div class="pantry-item-card">
+                  <div class="item-header">
+                    <div class="item-name">{{ item.ingredientName }}</div>
+                    <button class="delete-btn" (click)="deleteItem(item.id)">
+                      <span>🗑️</span>
+                    </button>
+                  </div>
+
+                  <div class="item-details">
+                    <div class="item-amount">
+                      <span class="amount-value">{{ item.amount }}</span>
+                      @if (item.unit) {
+                        <span class="amount-unit">{{ item.unit }}</span>
+                      }
+                    </div>
+
+                    @if (item.expirationDate) {
+                      <div class="item-expiry">
+                        <span>Expires: {{ item.expirationDate | date:'shortDate' }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Suggested Recipes -->
+    @if (suggestedRecipes.length > 0) {
+      <div class="suggested-recipes">
+        <h2 class="section-title">
+          <span>✨ Recipes You Can Make</span>
+        </h2>
+
+        <div class="recipes-grid">
+          @for (recipe of suggestedRecipes; track recipe.id) {
+            <a [routerLink]="['/recipes', recipe.id]" class="recipe-card">
+              <div class="recipe-image">
+                @if (recipe.imageUrl) {
+                  <img [src]="recipe.imageUrl" [alt]="recipe.title" />
+                } @else {
+                  <div class="recipe-placeholder">🍽️</div>
+                }
+              </div>
+
+              <div class="recipe-info">
+                <h4 class="recipe-title">{{ recipe.title }}</h4>
+                <div class="recipe-meta">
+                  <span>⏱️ {{ recipe.prepTimeMinutes + recipe.cookTimeMinutes }} min</span>
+                  <span>👥 {{ recipe.servings }} servings</span>
+                </div>
+              </div>
+            </a>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
