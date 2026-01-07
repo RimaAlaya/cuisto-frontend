@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { RecipeService } from '../../core/services/recipe.service';
 
 @Component({
   selector: 'app-create-recipe',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './create-recipe.component.html',
   styleUrl: './create-recipe.component.css'
 })
@@ -121,14 +121,27 @@ export class CreateRecipeComponent {
   }
 
   onSubmit() {
+    // Mark all fields as touched to show validation errors
+    this.recipeForm.markAllAsTouched();
+    this.markFormGroupTouched(this.recipeForm);
+
     if (this.recipeForm.invalid) {
-      this.recipeForm.markAllAsTouched();
-      this.errorMessage = 'Please fill in all required fields';
+      this.errorMessage = 'Please fill in all required fields correctly';
+
+      // Scroll to first error
+      setTimeout(() => {
+        const firstError = document.querySelector('.input-error, .error-message');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     // Transform instructions from array of objects to array of strings
     const formValue = this.recipeForm.value;
@@ -137,16 +150,46 @@ export class CreateRecipeComponent {
       instructions: formValue.instructions.map((inst: any) => inst.step)
     };
 
+    // Log for debugging
+    console.log('Submitting recipe:', recipeData);
+
     this.recipeService.createRecipe(recipeData).subscribe({
       next: (recipe) => {
-        this.successMessage = 'Recipe created successfully!';
+        this.successMessage = '✅ Recipe created successfully!';
+        console.log('Recipe created:', recipe);
+
         setTimeout(() => {
-          this.router.navigate(['/recipes', recipe.id]);
+          if (recipe.id) {
+            this.router.navigate(['/recipes', recipe.id]);
+          } else {
+            this.router.navigate(['/recipes']);
+          }
         }, 1500);
       },
       error: (error) => {
-        this.errorMessage = error.error?.message || 'Failed to create recipe';
+        console.error('Error creating recipe:', error);
+        this.errorMessage = error.error?.message || 'Failed to create recipe. Please try again.';
         this.isLoading = false;
+
+        // Scroll to error message
+        setTimeout(() => {
+          const errorEl = document.querySelector('.alert-error');
+          if (errorEl) {
+            errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    });
+  }
+
+  // Helper method to mark all form controls as touched
+  private markFormGroupTouched(formGroup: FormGroup | FormArray) {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+
+      if (control instanceof FormGroup || control instanceof FormArray) {
+        this.markFormGroupTouched(control);
       }
     });
   }

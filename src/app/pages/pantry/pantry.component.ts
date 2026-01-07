@@ -126,13 +126,24 @@ export class PantryComponent implements OnInit {
 
           // Check if recipe contains at least 2 pantry ingredients
           const matches = recipeIngredients.filter(ing =>
-            pantryIngredients.some(pantryIng => ing.includes(pantryIng))
+            pantryIngredients.some(pantryIng =>
+              ing.includes(pantryIng) || pantryIng.includes(ing)  // ADD THIS PART
+            )
           );
 
-          return matches.length >= 2;
-        }).slice(0, 6); // Show top 6 matches
+          return matches.length >= 1;  // CHANGE FROM 2 to 1 to show more results
+        }).slice(0, 6);
 
         this.isLoading = false;
+
+        // ADD THIS: Scroll to recipes section
+        if (this.suggestedRecipes.length > 0) {
+          setTimeout(() => {
+            document.querySelector('.suggested-recipes')?.scrollIntoView({
+              behavior: 'smooth'
+            });
+          }, 100);
+        }
       },
       error: (error) => {
         console.error('Error searching recipes:', error);

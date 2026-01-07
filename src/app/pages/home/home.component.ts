@@ -44,10 +44,11 @@ export class HomeComponent implements OnInit {
     { value: '5,000+', label: 'Happy Cooks' }
   ];
 
-  // NEW: AI-powered features
+  // AI-powered features
   personalizedRecipes: Recipe[] = [];
   dailyChallenge: Recipe | null = null;
   isLoadingRecommendations = false;
+  isLoadingChallenge = false;
 
   constructor(
     public authService: AuthService,
@@ -65,27 +66,34 @@ export class HomeComponent implements OnInit {
 
   loadPersonalizedRecommendations() {
     this.isLoadingRecommendations = true;
-    this.http.get<Recipe[]>(`${environment.apiUrl}/recommendations/personalized?limit=6`)
+    this.http.get<Recipe[]>(`${environment.apiUrl}/recommendations/personalized`)
       .subscribe({
         next: (recipes) => {
-          this.personalizedRecipes = recipes;
+          this.personalizedRecipes = recipes.slice(0, 6); // Take only first 6
           this.isLoadingRecommendations = false;
         },
         error: (error) => {
           console.error('Error loading recommendations:', error);
           this.isLoadingRecommendations = false;
+          // Silently fail - don't show error to user
+          this.personalizedRecipes = [];
         }
       });
   }
 
   loadDailyChallenge() {
+    this.isLoadingChallenge = true;
     this.http.get<Recipe>(`${environment.apiUrl}/recommendations/daily-challenge`)
       .subscribe({
         next: (recipe) => {
           this.dailyChallenge = recipe;
+          this.isLoadingChallenge = false;
         },
         error: (error) => {
           console.error('Error loading daily challenge:', error);
+          this.isLoadingChallenge = false;
+          // Silently fail - don't show error to user
+          this.dailyChallenge = null;
         }
       });
   }
@@ -96,11 +104,5 @@ export class HomeComponent implements OnInit {
 
   navigateToRegister() {
     this.router.navigate(['/register']);
-  }
-
-  viewRecipe(recipeId: string | undefined) {
-    if (recipeId) {
-      this.router.navigate(['/recipes', recipeId]);
-    }
   }
 }
